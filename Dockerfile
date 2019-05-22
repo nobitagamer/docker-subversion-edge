@@ -1,6 +1,10 @@
 FROM mamohr/centos-java:jre8
 
-MAINTAINER Mario Mohr <mohr.mario@gmail.com>
+MAINTAINER Nguyen Khac Trieu <trieunk@yahoo.com>
+
+# permissions
+ARG CONTAINER_UID=7004
+ARG CONTAINER_GID=7004
 
 RUN \
   yum update -y && \
@@ -18,15 +22,24 @@ RUN wget -q ${FILE} -O /tmp/csvn.tgz && \
 
 ENV RUN_AS_USER collabnet
 
+RUN export CONTAINER_USER=collabnet                 &&  \
+    export CONTAINER_GROUP=collabnet                &&  \
+    groupadd -g $CONTAINER_GID $CONTAINER_GROUP     &&  \
+    useradd -u $CONTAINER_UID                           \
+            -g $CONTAINER_GID                         \
+            -d /home/$CONTAINER_USER                    \
+            -s /bin/bash                                \
+            $CONTAINER_USER                      
 
-RUN useradd collabnet && \
-    chown -R collabnet.collabnet /opt/csvn && \
+RUN chown -R collabnet.collabnet /opt/csvn && \
     cd /opt/csvn && \
     ./bin/csvn install && \
     mkdir -p ./data-initial && \
     cp -r ./data/* ./data-initial
 
 EXPOSE 3343 4434 18080
+
+USER collabnet
 
 ADD files /
 
