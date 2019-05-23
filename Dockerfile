@@ -37,9 +37,13 @@ RUN chown -R collabnet.collabnet /opt/csvn && \
     mkdir -p ./data-initial && \
     cp -r ./data/* ./data-initial
 
-EXPOSE 3343 4434 18080
+# httpd_bind is a small application included with CollabNet Subversion Edge to allow the server access
+# to the standard ports without the server itself running with elevated privileges. In order for it to work,
+# httpd_bind must be owned by root and have its suid bit set such as shown by the commands below. These must be executed as root or sudo.
+RUN chown root:collabnet /opt/csvn/lib/httpd_bind/httpd_bind && \
+    chmod u+s /opt/csvn/lib/httpd_bind/httpd_bind
 
-USER collabnet
+EXPOSE 3343 4434 18080
 
 ADD files /
 
